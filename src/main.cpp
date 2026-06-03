@@ -9,10 +9,11 @@
 // ヘッダファイルのinclude
 // 
 #include <Arduino.h>                         // Arduinoフレームワークを使用する場合は必ず必要
-#include <SD.h>                              // SDカードを使うためのライブラリです。
-#include <Update.h>                          // 定義しないとエラーが出るため追加。
-#include <Ticker.h>                          // 定義しないとエラーが出るため追加。
-#include <M5StackUpdater.h>                  // M5Stack SDUpdaterライブラリ
+//#include <SD.h>                              // SDカードを使うためのライブラリです。
+//#include <Update.h>                          // 定義しないとエラーが出るため追加。
+//#include <Ticker.h>                          // 定義しないとエラーが出るため追加。
+//#include <M5StackUpdater.h>                  // M5Stack SDUpdaterライブラリ
+#include <LittleFS.h>                        // LittleFSを使うためのライブラリです。
 #include <M5Unified.h>                       // M5Unifiedライブラリ
 #include <Stackchan_system_config.h>         // stack-chanの初期設定ファイルを扱うライブラリ
 #include <Stackchan_servo.h>                 // stack-chanのサーボを動かすためのライブラリ
@@ -31,8 +32,8 @@ using namespace m5avatar;     // (Avatar.h)avatarのnamespaceを使う宣言（�
 Avatar avatar;                // (Avatar.h)avatarのクラスを定義
 ColorPalette *cps[2];
 
-#define SDU_APP_PATH "/stackchan_tester.bin"  // (SDUpdater.h)SDUpdaterで使用する変数
-#define TFCARD_CS_PIN 4                       // SDカードスロットのCSPIN番号
+//#define SDU_APP_PATH "/stackchan_tester.bin"  // (SDUpdater.h)SDUpdaterで使用する変数
+//#define TFCARD_CS_PIN 4                       // SDカードスロットのCSPIN番号
 
 StackchanSERVO servo;                         // (Stackchan_servo.h) サーボを扱うためのクラス
 StackchanSystemConfig system_config;          // (Stackchan_system_config.h) プログラム内で使用するパラメータをYAMLから読み込むクラスを定義
@@ -172,10 +173,12 @@ void setup() {
   M5.Log.setLogLevel(m5::log_target_serial, ESP_LOG_INFO);     // M5Unifiedのログ初期化（シリアルモニターにESP_LOG_INFOのレベルのみ表示する)
   M5.Log.setEnableColor(m5::log_target_serial, false);         // M5Unifiedのログ初期化（ログをカラー化しない。）
   M5_LOGI("Hello World");                                      // logにHello Worldと表示
-  SD.begin(GPIO_NUM_4, SPI, 25000000);                         // SDカードの初期化
-  delay(2000);                                                 // SDカードの初期化を少し待ちます。
- 
-  system_config.loadConfig(SD, "");                            // SDカードから初期設定ファイルを読み込む
+  //SD.begin(GPIO_NUM_4, SPI, 25000000);                         // SDカードの初期化
+  //delay(2000);                                                 // SDカードの初期化を少し待ちます。
+  LittleFS.begin();                                            // LittleFSの初期化 
+  
+  //system_config.loadConfig(SD, "");                            // SDカードから初期設定ファイルを読み込む
+  system_config.loadConfig(LittleFS, "");                      // 内蔵フラッシュメモリから初期設定ファイルを読み込む
   if (M5.getBoard() == m5::board_t::board_M5Stack) {           // Core1かどうかの判断
     if (system_config.getServoInfo(AXIS_X)->pin == 22) {       // サーボのGPIOが22であるか確認（本当は21も確認してもいいかもしれないが省略）
       // M5Stack Coreの場合、Port.Aを使う場合は内部I2CをOffにする必要がある。バッテリー表示は不可。
@@ -237,14 +240,15 @@ void loop() {
     delay(2000);                  // 2秒待ちます。(吹き出しをしばらく表示させるため)
     avatar.setSpeechText("");     // 吹き出しの表示を消します。
   } 
-  if (M5.BtnC.pressedFor(5000)) {                                    // ボタンCを5秒長押しした場合(この処理はあまり使わないでしょう。)
+  /*if (M5.BtnC.pressedFor(5000)) {                                    // ボタンCを5秒長押しした場合(この処理はあまり使わないでしょう。)
     M5_LOGI("Will copy this sketch to filesystem");                  // ログへ出力
-    if (saveSketchToFS( SD, SDU_APP_PATH, TFCARD_CS_PIN )) {         // SDUpdater用のbinファイルをSDカードに書き込みます。
+    if (saveSketchToFS(SD, SDU_APP_PATH, TFCARD_CS_PIN)) {         // SDUpdater用のbinファイルをSDカードに書き込みます。
       M5_LOGI("Copy Successful!");
     } else {
       M5_LOGI("Copy failed!");
     }
-  } else if (M5.BtnC.wasPressed()) {     // ボタンCが押された場合
+  }*/
+  else if (M5.BtnC.wasPressed()) {     // ボタンCが押された場合
     //mumumuServo();                     // 左右に高速で首を振ります。（サーボが壊れるのであまり使わないでください。）コメントなので実行されません。
     moveRandom();                        // ランダムモードになります。
   }
