@@ -5,6 +5,12 @@ Takao Akakiさんの https://github.com/mongonta0716/stack-chan-tester をマイ
 必要に応じて/data/yaml/SC_BasicConfig.yamlなどを書き換えてみてください。
 
 /data/yaml/SC_BasicConfig.yamlファイルはPlatformIOの"PROJECT TASKS"メニュー配下の"Upload Filesystem Image"などからｽﾀｯｸﾁｬﾝ本体のflashメモリに転送してください。
+転送した設定ファイルを消すには
++ 同名のファイルで上書きする
++ フラッシュエリア全体をフォーマットし直す(PlatformIO/M5 Burner等使用)
++ 個別ファイルを消去するプログラムを書いて実行する(ここでは説明しません)
+
+どれかを行ってください
 
 オリジナルにあった、ボタンC長押しによるパラメータ保存機能は削除しています。
 
